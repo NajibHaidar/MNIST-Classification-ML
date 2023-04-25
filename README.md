@@ -74,7 +74,72 @@ All three classifiers have their own advantages and disadvantages, and their per
 
 ### Sec. III. Algorithm Implementation and Development
 
-Firstly, 
+Firstly, I loaded the MNIST dataset from the scikit-learn library using the fetch_openml function:
+
+```
+from sklearn.datasets import fetch_openml
+
+# Load the MNIST dataset
+mnist = fetch_openml('mnist_784')
+
+# Reshape each image into a column vector
+X = mnist.data.T / 255.0  # Scale the data to [0, 1]
+Y = mnist.target
+```
+
+The MNIST dataset is a 2D array where each row corresponds to an image and each column corresponds to a pixel value. This code uses the transpose (.T) method to convert the dataset into a 784x70000 array where each column corresponds to an image and each row corresponds to a pixel value. This is often a more convenient format for performing computations and analyses.
+
+Additionally, the pixel values are divided by 255 to scale them down to a range of [0,1]. This is because the original pixel values range from 0-255, but many machine learning algorithms work better when the data is scaled to be between 0 and 1.
+
+Also, this code creates an array Y containing the target labels for each image in the dataset. These labels indicate which digit (0-9) is shown in each image, and will be used as the target variable for classification tasks.
+
+We then run SVD and store the three matricies formed in variables U, s, and V:
+
+```
+# Perform SVD on X
+U, s, V = np.linalg.svd(X, full_matrices=False)
+```
+
+As discussed in the theoretical background section, we can use the s (Σ) matrix to obtain the singular values in descending order. Hence, we can simply plot s to get the singular value spectrum like this:
+
+```
+# Plot the singular value spectrum
+plt.plot(s)
+plt.xlabel('Singular Value Index')
+plt.ylabel('Singular Value')
+plt.show()
+```
+
+The singular value spectrum from SVD represents the singular values of the original matrix. In the context of image reconstruction, it represents the amount of energy captured by each mode (or singular value) of the SVD. The singular values are arranged in decreasing order, so the first singular value captures the most energy and the last singular value captures the least.
+
+To determine the number of modes necessary for good image reconstruction, we need to look at the amount of energy captured by each mode. One way to do this is to calculate the cumulative sum of the singular values and normalize by the total sum of all singular values. Then we can plot this cumulative sum and look for an "elbow" or "knee" point where adding more modes does not contribute much to the total energy captured.
+
+The rank r of the digit space can be determined by looking at the number of non-zero singular values in the singular value spectrum. This is because the rank of the original matrix is equal to the number of non-zero singular values. We use the following snippet of code to plot the cumulative sum and then find _r_:
+
+```
+# Plot the cumulative sum of the singular values
+plt.plot(np.cumsum(s)/np.sum(s))
+plt.xlabel('Singular Value Index')
+plt.ylabel('Cumulative Sum')
+plt.show()
+
+# Set the threshold for the amount of variance to retain
+threshold = 0.46
+
+# Calculate the number of dimensions to keep
+k = np.argmax(np.cumsum(s) >= threshold*np.sum(s)) + 1
+
+# Calculate the number of singular values greater than s[k-1] (where k is the number of dimensions to keep)
+r = np.sum(s > s[k-1])
+
+# Print the number of dimensions and the number of retained singular values
+print('k:', k)
+print('r:', r)
+```
+
+Here, the code first sets a threshold for the amount of variance to retain from the SVD, which is a value between 0 and 1. It then uses the cumulative sum of the singular values (stored in s) to find the index (k) of the last singular value that, when added to the sum of the preceding singular values, exceeds the threshold times the total sum of the singular values. The number of dimensions to keep is then k. Finally, the number of singular values greater than s[k-1] is counted to obtain the number of singular values that are retained, which is stored in r.
+
+The results will be analyzed in depth in Section IV. 
 ### Sec. IV. Computational Results
 
 ### Sec. V. Summary and Conclusions
