@@ -442,7 +442,13 @@ Figures 2 and 3 show us exactly what we would expect from singular values. We ob
 ![image](https://user-images.githubusercontent.com/116219100/234249335-d69da457-8156-4fd3-862a-e87f2d243bd4.png)
 *Figure 4: Scree Plot of Percentage of Total Variance Captured vs Principal Component*
 
-To stress on this concept more, I have made a scree plot of the cumulative sum plot in figure 3. Here we can see that 'elbow' more clearly which is the region where the percentage of total variance captured begins to add little to no amount. Visually, it seemed to me that this elbow occurs at principal component 80 and thus I drew a vertical line at that point. Notice how basically after 80 principal components the variation of results is very slim and thus those values can be truncated. This means our data can be efficiently represented in 80 dimensions of V-modes rather than the 784 pixel space or 784 V-modes. Thus, we could have used the _TruncatedSVD()_ function with _n_components = 80_ instead of the regular SVD. The truncated SVD approach would have saved ample time since our feature space would have been reduced by 10-fold. This would result in much quicker runtime at the cost of accuracy. However, the difference in accuracy would be very minimal as the plot in figure 4 tells us since 80 PC components is somewhat of a cuttoff point.
+To stress on this concept more, I have made a scree plot of the cumulative sum plot in figure 3. Here we can see that 'elbow' more clearly which is the region where the percentage of total variance captured begins to add little to no amount. Visually, it seemed to me that this elbow occurs at principal component 80 and thus I drew a vertical line at that point. Notice how basically after 80 principal components the variation of results is very slim and thus those values can be truncated. This means our data can be efficiently represented in 80 dimensions of V-modes rather than the 784 pixel space or 784 V-modes. Thus, we could have used the _TruncatedSVD()_ function with _n_components = 80_ instead of the regular SVD. The truncated SVD approach would have saved ample time since our feature space would have been reduced by 10-fold. This would result in much quicker runtime at the cost of accuracy. However, the difference in accuracy would be very minimal as the plot in figure 4 tells us since 80 PC components is somewhat of a cutoff point.
+
+We used this same logic to mathematically calculate the rank _r_ as explained in the previous section. When aiming for 56% retention of variance, we got that the rank _r_ would be 81. Note that this cutoff could be shifted up and down along the 'elbow' but the greater the _r_ the more accuracy but the higher the runtime, and vice versa. In this case, we can say that around 80 modes are necesssat for good image reconstruction.
+
+Next we started to classify our data:
+
+For the LDA
 
 
 
