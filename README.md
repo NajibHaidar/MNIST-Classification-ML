@@ -84,7 +84,7 @@ mnist = fetch_openml('mnist_784')
 
 # Reshape each image into a column vector
 X = mnist.data.T / 255.0  # Scale the data to [0, 1]
-Y = mnist.target
+Y = mnist.target.astype('int32')
 ```
 
 The MNIST dataset is a 2D array where each row corresponds to an image and each column corresponds to a pixel value. This code uses the transpose (.T) method to convert the dataset into a 784x70000 array where each column corresponds to an image and each row corresponds to a pixel value. This is often a more convenient format for performing computations and analyses.
