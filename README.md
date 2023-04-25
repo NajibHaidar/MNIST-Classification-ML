@@ -429,4 +429,21 @@ The results will be analyzed in depth in Section IV.
 
 ### Sec. IV. Computational Results
 
+After running SVM, the singular values and the cumulative sum of the singular values were plotted against the singular value index:
+
+![image](https://user-images.githubusercontent.com/116219100/234247692-6b79498d-9172-4157-b17c-c23ac8e56fac.png)
+*Figure 2: Singular Value vs Singular Value Index*
+
+![image](https://user-images.githubusercontent.com/116219100/234247748-91ff782d-5d6a-4227-b697-a6eb1fed7c08.png)
+*Figure 3: Cumulative Sum of Singular Value vs Singular Value Index*
+ 
+Figures 2 and 3 show us exactly what we would expect from singular values. We observe that they decrease in value as we move down the diagonal of the matrix _s_. We also see the how much higher the first couple singular values are compared to the rest. This proves that the first couple singular values are all we need to properly define this data set since the effect of the latter singular values present little to no variance and thus do not alter our model much. The cumulative sum plot in figure 3 helps visualize this effect more strongly.
+
+![image](https://user-images.githubusercontent.com/116219100/234249335-d69da457-8156-4fd3-862a-e87f2d243bd4.png)
+*Figure 4: Scree Plot of Percentage of Total Variance Captured vs Principal Component*
+
+To stress on this concept more, I have made a scree plot of the cumulative sum plot in figure 3. Here we can see that 'elbow' more clearly which is the region where the percentage of total variance captured begins to add little to no amount. Visually, it seemed to me that this elbow occurs at principal component 80 and thus I drew a vertical line at that point. Notice how basically after 80 principal components the variation of results is very slim and thus those values can be truncated. This means our data can be efficiently represented in 80 dimensions of V-modes rather than the 784 pixel space or 784 V-modes. Thus, we could have used the _TruncatedSVD()_ function with _n_components = 80_ instead of the regular SVD. The truncated SVD approach would have saved ample time since our feature space would have been reduced by 10-fold. This would result in much quicker runtime at the cost of accuracy. However, the difference in accuracy would be very minimal as the plot in figure 4 tells us since 80 PC components is somewhat of a cuttoff point.
+
+
+
 ### Sec. V. Summary and Conclusions
