@@ -139,6 +139,95 @@ print('r:', r)
 
 Here, the code first sets a threshold for the amount of variance to retain from the SVD, which is a value between 0 and 1. It then uses the cumulative sum of the singular values (stored in s) to find the index (k) of the last singular value that, when added to the sum of the preceding singular values, exceeds the threshold times the total sum of the singular values. The number of dimensions to keep is then k. Finally, the number of singular values greater than s[k-1] is counted to obtain the number of singular values that are retained, which is stored in r.
 
+For a clearer view on when these singular values started to dip, I also plotted using a scree plot:
+
+```
+# calculate the cumulative sum of the squared singular values
+cumulative_sum = np.cumsum(s**2)
+
+# calculate the percentage of total variance captured by each singular value
+variance_explained = cumulative_sum / np.sum(s**2)
+
+# plot the scree plot
+plt.plot(np.arange(1, len(s)+1), variance_explained, 'ro-', linewidth=2)
+plt.axvline(x=10, color='b', linestyle='--')
+plt.title('Scree Plot')
+plt.xlabel('Principal Component')
+plt.ylabel('Variance Explained')
+plt.show()
+```
+
+Then, the data was projected onto different V-modes, starting with 2,3, and 5:
+
+```
+# Select the V-modes to use
+v_modes = [2, 3, 5]
+
+# Project the data onto the selected V-modes
+X_projected = V[:, v_modes].T @ X.values
+
+# Create a 3D plot with a larger size
+fig = plt.figure(figsize=(10, 10))
+ax = fig.add_subplot(111, projection='3d')
+
+# Scatter plot the projected data with a legend
+scatter = ax.scatter(X_projected[0, :], X_projected[1, :], X_projected[2, :], c=Y.astype(int), cmap='jet')
+legend = ax.legend(*scatter.legend_elements(), title='Classes', loc='upper left')
+ax.add_artist(legend)
+
+# Add axis labels
+ax.set_xlabel(f'V-mode {v_modes[0]}')
+ax.set_ylabel(f'V-mode {v_modes[1]}')
+ax.set_zlabel(f'V-mode {v_modes[2]}')
+
+ax.set_title('Projection onto V-modes 2, 3, and 5')
+
+# # Set the view angle
+# ax.view_init(90, 0)
+
+# Show the plot
+plt.tight_layout()
+plt.show()
+```
+
+First, we select the three V-modes (columns of the V matrix) that we want to use for the projection. Next, we compute the projection of the data matrix X onto the selected V-modes, by multiplying the transpose of the selected V-modes with the data matrix. Note that we first transpose the selected V-modes so that they have the same shape as the data matrix. The rest simply plots the data into as a scatter plot. It should be noted here that the parameter _c_ in the scatter function represents the color of the markers in the scatter plot. It can take an array of values to color each marker differently based on some categorical or continuous variable. In this case, Y.astype(int) is passed as the argument for c, which is an array of the target values of the MNIST dataset, converted to integers. Therefore, each marker in the scatter plot will be colored based on its corresponding digit label. The cmap parameter is used to specify the colormap to use for coloring the markers. 'jet' is a popular choice of colormap that maps low values to blue, intermediate values to green and high values to red.
+
+Now, LDA was performed to classify between 2 digits:
+
+```
+# LDA for 2 digits
+# Perform PCA on the original dataset to reduce dimensionality to 10 components
+pca = PCA(n_components=10)
+pca.fit(X)
+X_pca = pca.transform(X)
+
+# Select only 4s and 9s in the new PCA space
+X_pca_49 = X_pca[(Y == 4) | (Y == 9)]
+Y_pca_49 = Y[(Y == 4) | (Y == 9)]
+
+# Split into training and testing sets
+X_pca_train, X_pca_test, Y_pca_train, Y_pca_test = train_test_split(X_pca_49, Y_pca_49, test_size=0.2, random_state=42)
+
+# Train an LDA model on the training set using the transformed data
+lda_pca = LinearDiscriminantAnalysis()
+lda_pca.fit(X_pca_train, Y_pca_train)
+
+# Make predictions on the testing set
+Y_pca_pred = lda_pca.predict(X_pca_test)
+
+# Evaluate the accuracy of the classifier
+accuracy_LDA2_pca = accuracy_score(Y_pca_test, Y_pca_pred)
+print(f"Accuracy: {accuracy_LDA2_pca:.2f}")
+```
+
+The code performs principal component analysis (PCA) on the original dataset _X_, with the aim of reducing the dimensionality of the dataset from the original number of features to just 10. The PCA() function is used to create a PCA object, and _n_components=10_ is set to specify that we want to keep only the top 10 principal components. The .fit() method is then called on the PCA object with _X_ as input to train the PCA model, and the .transform() method is called to transform _X_ into a new dataset _X_pca_ with **only 10 dimensions**. 
+
+We filter the dataset _X_pca_ to only include samples that correspond to the digit 4 or the digit 9, and the corresponding labels _Y_pca_ are also filtered accordingly. The filtered dataset and labels are then split into training and testing sets using the _train_test_split()_ function from the _sklearn.model_selection_ module. The test_size parameter is set to 0.2 to specify that we want to use 20% of the data for testing, and random_state is set to 42 to ensure reproducibility.
+
+A linear discriminant analysis (LDA) model is then trained on the training set using the transformed dataset _X_pca_train_ and corresponding labels _Y_pca_train_. The LinearDiscriminantAnalysis() function from the sklearn.discriminant_analysis module is used to create the LDA object, and the .fit() method is called to train the LDA model. The trained LDA model is used to make predictions on the testing set _X_pca_test_, and the predicted labels are stored in _Y_pca_pred_.
+
+Finally, the accuracy of the classifier is evaluated by comparing the predicted labels _Y_pca_pred_ with the true labels _Y_pca_test_, and computing the accuracy using the _accuracy_score()_ function from the _sklearn.metrics_ module. The resulting accuracy is printed to the console.
+
 The results will be analyzed in depth in Section IV. 
 ### Sec. IV. Computational Results
 
