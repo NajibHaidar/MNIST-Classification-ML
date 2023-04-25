@@ -228,7 +228,205 @@ A linear discriminant analysis (LDA) model is then trained on the training set u
 
 Finally, the accuracy of the classifier is evaluated by comparing the predicted labels _Y_pca_pred_ with the true labels _Y_pca_test_, and computing the accuracy using the _accuracy_score()_ function from the _sklearn.metrics_ module. The resulting accuracy is printed to the console.
 
-The results will be analyzed in depth in Section IV. 
+The same was then done for the comparison and classification of three digits, 0, 8, and 9. The approach is entirely similar except now we must filter out the 0s, 8s, and 9s into the dataset under study:
+
+```
+# LDA for 3 digits
+# Select only 0s and 8s and 9s
+X_089 = X_pca[(Y == 0) | (Y == 8) | (Y == 9)]
+Y_089 = Y[(Y == 0) | (Y == 8) | (Y == 9)]
+```
+
+After that, I looped through all possible combinations of digits and calculated the accuracy for all 45 unique combinations:
+
+```
+from itertools import combinations
+
+# Define the list of digits to use
+digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+# Initialize a list to store the accuracies and corresponding digit pairs
+results = []
+
+# Loop over all pairs of digits
+for digit1, digit2 in combinations(digits, 2):
+    
+    # Select the data for the current pair of digits
+    X_pair = X_pca[(Y == digit1) | (Y == digit2)]
+    Y_pair = Y[(Y == digit1) | (Y == digit2)]
+    
+    # Split into training and testing sets
+    X_train, X_test, Y_train, Y_test = train_test_split(X_pair, Y_pair, test_size=0.2, random_state=42)
+    
+    # Train an LDA model
+    lda = LinearDiscriminantAnalysis()
+    lda.fit(X_train, Y_train)
+    
+    # Make predictions on the testing set
+    Y_pred = lda.predict(X_test)
+    
+    # Evaluate the accuracy of the classifier
+    accuracy = accuracy_score(Y_test, Y_pred)
+    
+    # Append the digit pair and accuracy to the results list
+    results.append((digit1, digit2, accuracy))
+```
+
+The approach is the same as the two digits version execept we loop through different combinations of digits and store the pair and their accuracy in a _results_ array. I then sorted this _results_ array by accuracy and printed the sorted array:
+
+```
+# sort the results
+sorted_results = sorted(results, key=lambda x: x[2], reverse=True)
+# Print the sorted list of results
+for result in sorted_results:
+    print(f"Digits: ({result[0]}, {result[1]})\tAccuracy: {result[2]:.2f}")
+```
+
+The dataset was then tested for accuracy when using SVM and decision tree classifiers. The approach is the same as before except rather than fitting our data to LDA, we fit to SVC (SVM) and DecisionTreeClassifier (DTC):
+
+```
+#Split the data into training and testing sets
+X_train_SVM, X_test_SVM, y_train_SVM, y_test_SVM = train_test_split(X_pca, Y, test_size=0.2, random_state=42)
+
+#Scale the data using a standard scaler
+scaler = StandardScaler() 
+X_train_SVM = scaler.fit_transform(X_train_SVM) 
+X_test_SVM = scaler.transform(X_test_SVM)
+
+#Initialize an SVM classifier
+svm = SVC(kernel='rbf', C=1, gamma='auto')
+
+# Train the classifier on the training set
+svm.fit(X_train_SVM, y_train_SVM)
+
+# Make predictions on the testing set
+y_pred_SVM = svm.predict(X_test_SVM)
+
+# Evaluate the accuracy of the classifier
+accuracy = accuracy_score(y_test_SVM, y_pred_SVM) 
+print(f"Accuracy: {accuracy:.2f}")
+```
+
+```
+# Split the data into training and testing sets
+X_train_DTC, X_test_DTC, y_train_DTC, y_test_DTC = train_test_split(X_pca, Y, test_size=0.2, random_state=42)
+
+# Train a decision tree classifier with default hyperparameters
+clf = DecisionTreeClassifier()
+clf.fit(X_train_DTC, y_train_DTC)
+
+# Make predictions on the testing set
+y_pred_DTC = clf.predict(X_test_DTC)
+
+# Evaluate the accuracy of the classifier
+accuracy_DTC = accuracy_score(y_test_DTC, y_pred_DTC)
+print(f"Accuracy: {accuracy:.2f}")
+```
+
+I then printed this decision tree using the _plot_tree_ function:
+
+```
+# Plot the decision tree
+plt.figure(figsize=(20, 10))
+plot_tree(clf, filled=True)
+plt.show()
+```
+
+The _filled_ parameter was set to true since that fils the decision tree nodes with color for better visuilization of the classification.
+
+Finally, the accuracy of classification of the least and most common pairs of digits (according to LDA) was compared to the accuracy when using SVM and CLF:
+
+```
+# Hardest pair: (4,9)
+# Easiest pair: (1,0)
+# Select only 4s and 9s
+X_49 = X_pca[(Y == 4) | (Y == 9)]
+Y_49 = Y[(Y == 4) | (Y == 9)]
+
+# Split the data into training and testing sets
+X_train_SVM_49, X_test_SVM_49, y_train_SVM_49, y_test_SVM_49 = train_test_split(X_49, Y_49, test_size=0.2, random_state=42)
+
+# Scale the data using a standard scaler
+scaler_49 = StandardScaler()
+X_train_SVM_49 = scaler_49.fit_transform(X_train_SVM_49)
+X_test_SVM_49 = scaler_49.transform(X_test_SVM_49)
+
+# Initialize an SVM classifier
+svm_49 = SVC(kernel='rbf', C=1, gamma='auto')
+
+# Train the classifier on the training set
+svm_49.fit(X_train_SVM_49, y_train_SVM_49)
+
+# Make predictions on the testing set
+y_pred_SVM_49 = svm_49.predict(X_test_SVM_49)
+
+# Evaluate the accuracy of the classifier
+accuracy_SVM_49 = accuracy_score(y_test_SVM_49, y_pred_SVM_49)
+print(f"Accuracy: {accuracy_SVM_49:.2f}")
+```
+
+```
+# Split the data into training and testing sets
+X_train_DTC_49, X_test_DTC_49, y_train_DTC_49, y_test_DTC_49 = train_test_split(X_49, Y_49, test_size=0.2, random_state=42)
+
+# Train a decision tree classifier with default hyperparameters
+clf_49 = DecisionTreeClassifier()
+clf_49.fit(X_train_DTC_49, y_train_DTC_49)
+
+# Make predictions on the testing set
+y_pred_DTC_49 = clf.predict(X_test_DTC_49)
+
+# Evaluate the accuracy of the classifier
+accuracy_DTC_49 = accuracy_score(y_test_DTC_49, y_pred_DTC_49)
+print(f"Accuracy: {accuracy_DTC_49:.2f}")
+```
+
+```
+X_10 = X_pca[(Y == 1) | (Y == 0)]
+Y_10 = Y[(Y == 1) | (Y == 0)]
+
+# Split the data into training and testing sets
+X_train_SVM_10, X_test_SVM_10, y_train_SVM_10, y_test_SVM_10 = train_test_split(X_10, Y_10, test_size=0.2, random_state=42)
+
+# Scale the data using a standard scaler
+scaler_10 = StandardScaler()
+X_train_SVM_10 = scaler_10.fit_transform(X_train_SVM_10)
+X_test_SVM_10 = scaler_10.transform(X_test_SVM_10)
+
+# Initialize an SVM classifier
+svm_10 = SVC(kernel='rbf', C=1, gamma='auto')
+
+# Train the classifier on the training set
+svm_10.fit(X_train_SVM_10, y_train_SVM_10)
+
+# Make predictions on the testing set
+y_pred_SVM_10 = svm_10.predict(X_test_SVM_10)
+
+# Evaluate the accuracy of the classifier
+accuracy_SVM_10 = accuracy_score(y_test_SVM_10, y_pred_SVM_10)
+print(f"Accuracy: {accuracy_SVM_10:.2f}")
+```
+
+```
+# Split the data into training and testing sets
+X_train_DTC_10, X_test_DTC_10, y_train_DTC_10, y_test_DTC_10 = train_test_split(X_10, Y_10, test_size=0.2, random_state=42)
+
+# Train a decision tree classifier with default hyperparameters
+clf_10 = DecisionTreeClassifier()
+clf_10.fit(X_train_DTC_10, y_train_DTC_10)
+
+# Make predictions on the testing set
+y_pred_DTC_10 = clf.predict(X_test_DTC_10)
+
+# Evaluate the accuracy of the classifier
+accuracy_DTC_10 = accuracy_score(y_test_DTC_10, y_pred_DTC_10)
+print(f"Accuracy: {accuracy_DTC_10:.2f}")
+```
+
+The only difference in these cases versus the previously described cases is that we must filter different values from our main PCA space dataset.
+
+The results will be analyzed in depth in Section IV.
+
 ### Sec. IV. Computational Results
 
 ### Sec. V. Summary and Conclusions
