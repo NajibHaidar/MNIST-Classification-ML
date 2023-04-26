@@ -433,7 +433,7 @@ The results will be analyzed in depth in Section IV.
 
 ### Sec. IV. Computational Results
 
-After running SVM, the singular values and the cumulative sum of the singular values were plotted against the singular value index:
+After running SVD, the singular values and the cumulative sum of the singular values were plotted against the singular value index:
 
 ![image](https://user-images.githubusercontent.com/116219100/234247692-6b79498d-9172-4157-b17c-c23ac8e56fac.png)
 *Figure 2: Singular Value vs Singular Value Index*
@@ -492,5 +492,37 @@ Then we ran SVM and DTC on the easiest and most difficult to diffrentiate pairs 
 Beginning with the easiest pair (0,1), all three algorithms did execptionally well with almost 100% accuracy for LDA and SVM and around 98% for DTC. This shows that all three algorithms can classify images that should be easy to easy to diffrentiate between very well. 
 
 However, when distingushing between the hardest pair (4,9), it is evident that DTC did the best with 96% accuracy. SVM did slightly worse with around 95% whereas LDA was comparatively significantly worse with only 84% accuracy. This shows how the intricacy of the SVM and DTC algorithms are more beneficial at separating between closely knit clusters in our PCA feature space. Additionally, we can definitely expect that if we had increased the number of PCA components, LDA would have attained a much higher accuracy as well.
+
+Let us discuss and analyze the SVD feature space further:
+
+![image](https://user-images.githubusercontent.com/116219100/234466432-0376b202-5dfa-4d61-ae93-b72d7633ecf8.png) 
+*Figure 11: First 6 SVD Modes*
+ 
+The first 6 SVD modes are the first 6 columns of our U matrix that resulted from SVD. These modes tell us the direction in the input space along which the data varies the most up to the 6th most. These directions give us an idea of the most important patterns or features present in the MNIST data. In particular, the first few modes are often used for dimensionality reduction or feature extraction in machine learning tasks. 
+
+Thus, we can see that SVD Mode 0 defines the most important features in the dataset. It appears to look like a mix of a 9 and an 8 whereas SVD Mode 1 seems highly similar to a 0. Hence, we can see what SVD identified to be the features that would help classiify this data most accurately. 
+
+![image](https://user-images.githubusercontent.com/116219100/234466978-54bacda3-18d6-4bbb-a5d8-c518993d5a7d.png)
+*Figure 12: First 6 V Modes*
+
+The first 6 V modes are the first 6 columns of our V matrix that resulted from SVD. These modes tell us the directions in the feature space (i.e., the space spanned by the columns of the data matrix) along which the data varies the most up to the 6th most.
+
+Note that we did not truncate SVD and thus we ran it on 784 components. With such high (maximum) dimensionality, the V modes extract with pixels helped classify the data the most. It is difficult to interpret exactly why these pixels were chosen but it is still an intersting phenomenon to observe.
+
+We then projected our data onto different sets of 3 V-modes and plotted in 3D:
+
+![image](https://user-images.githubusercontent.com/116219100/234467628-78ad9ec7-eb6f-481c-83ec-80fca8a0138b.png)
+*Figure 13: Projection of Data onto V-modes 2, 3, and 5*
+
+![image](https://user-images.githubusercontent.com/116219100/234467885-cb0f33b1-3593-48d0-8234-8ee0c7dffbf7.png)
+*Figure 14: Projection of Data onto V-modes 1, 2, and 3*
+
+![image](https://user-images.githubusercontent.com/116219100/234467941-aabfb9ff-6db1-4a2a-bde8-cdf686cfdf15.png)
+*Figure 15: Projection of Data onto V-modes 0, 1, and 2*
+
+![image](https://user-images.githubusercontent.com/116219100/234467977-4149e275-96ae-446e-8948-998acf3b276f.png)
+*Figure 16: Projection of Data onto V-modes 750, 700, and 800*
+
+While we could not find three modes that would allow a clearer view of data clustering, we can still analyze these several cases altogether. We can see that typically 7 and 9 remain close to each other and in fact according to LDA, they were the 4th most difficult to separate with an accuracy of 91%. At least however they are more easily seperable than 4 and 9 which in all cases appear to be completley mixed into each other. This shows why it was so difficult to separate them using LDA since this problem was too difficult to solve using a linear analysis. Whereas using SVM for example, these points were moved to higher dimensions and cut by hyperplanes, thus provding a better classification accuracy.
 
 ### Sec. V. Summary and Conclusions
