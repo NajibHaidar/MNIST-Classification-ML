@@ -196,10 +196,14 @@ Now, LDA was performed to classify between 2 digits:
 
 ```
 # LDA for 2 digits
+
+# Transpose the data X for easier filtering using Boolean logic
+Xt = X.T
+
 # Perform PCA on the original dataset to reduce dimensionality to 10 components
 pca = PCA(n_components=10)
-pca.fit(X)
-X_pca = pca.transform(X)
+pca.fit(Xt)
+X_pca = pca.transform(Xt)
 
 # Select only 4s and 9s in the new PCA space
 X_pca_49 = X_pca[(Y == 4) | (Y == 9)]
@@ -448,8 +452,45 @@ We used this same logic to mathematically calculate the rank _r_ as explained in
 
 Next we started to classify our data:
 
-For the LDA
+For the LDA, we first compared 2 random digits to test for their accuracy. We tested the pair of digits (4,9) and attained an accuracy of 84%. That is not a bad value however later we will see that 4 and 9 ended up being the most difficult pair to diffrentiate using LDA. 
+
+The same process was then repeated for 3 digits instead: using 0, 8 and 9. LDA attained an accuracy of 94% which is very impressive considering our PCA space composed of only 10 components. This means that LDA was able to diffrentiate between the digits 0, 8, and 9 relatively well.
+
+To amp things up, we sought to determine which 2 digit combinations yielded the best and the worst accuracy results in 10 component PCA space using LDA. Here are the results of the 45 unique combinations sorted by accuracy:
+
+![image](https://user-images.githubusercontent.com/116219100/234457998-96187c1e-3c76-46d9-881a-08601e4f8c6e.png)
+ *Figure 5: LDA Accuracies of all 45 Unique Digit Combinations*
+ 
+ I have created a visualization of this accuracy data in the form of a var plot below:
+
+![image](https://user-images.githubusercontent.com/116219100/234460746-a63ff329-735e-45f7-9c82-b66513201549.png)
+ *Figure 6: Bar Plot of LDA Accuracies of all 45 Unique Digit Combinations*
+
+We can see that (0,1) is the best pair of digits along with (6,7) with almost 100% accuracy when rounded to 2 decimal places. This was expected since 0 and 1 are highly dissimilar in appearance and thus we can expect that they should be easily distinguishable. In fact, looking down the list, we can see that the accuracies follow a logical trend of visually dissimilar digits being placed towards the top and less distinguishable digit pairs are found near the bottom. Overall however, LDA prodcuded pretty accurate results for a PCA space of 10 dimensions. The pair (4,9) was disconvered to be the pair that was most difficult to distinguish with accuracy of 84%. That makes sense because structurally, a 4 and a 9 are very similarly looking. Apart from the people who leave their 4s disconnected from the top, both a 4 and a 9 consist of a line on the right followed by a roundish closed off structure to the top left of that line. Still, in a PCA space of 10 components, 84% means LDA did a good job diffrentiating between them.
+
+Moving on to testing how well SVM and decision tree classifiers (DTC) separate between all 10 digits, we found some interesting results. Both SVM and DTC had an accuracy of 93%. Given only 10 dimensions in the feature space, this is great. The tree for DTC can be found below: 
+
+![image](https://user-images.githubusercontent.com/116219100/234461398-0f4ccb1c-a289-4444-a4a5-c214281c3954.png)
+ *Figure 7: Tree Plot for 70000 Image Decision Tree Classifier*
+ 
+ Since this tree is too dense to be used as a proper example, I repeated the plot with the first 50 images instead and produced the following plot:
+
+![image](https://user-images.githubusercontent.com/116219100/234461861-aafda35c-3988-4f45-847b-55fb3f3a12b2.png)
+ *Figure 8: Tree Plot for First 50 Image Decision Tree Classifier*
+
+This gives a great visualization on how the DTC classifies the given data. At every node, it must split the data into 2 nodes due to some decision. The decision to be made is given by the first line in each node, for example, x[2] <= -0.504; if this decision is satisfied, the tree adds a node to the left and follows that path. Eventually, after repeating this process enough, it can classify (based on the path taken i.e. the decisions) what class each leaf node must corespond to. The class is represented by the color of the node but more formally as the last line in the node: 'class = 1'.
+
+Then we ran SVM and DTC on the easiest and most difficult to diffrentiate pairs of digits according to the results from LDA (see figure 6). The results can be seen from figures 9 and 10 below:
+
+![image](https://user-images.githubusercontent.com/116219100/234463907-499baf96-5452-48a5-a586-b2f59d181c8f.png)
+ *Figure 9: Accuracy of the Three Algorithms on Separating Easiest Pair (0,1)*
 
 
+![image](https://user-images.githubusercontent.com/116219100/234463939-ff1b26e0-4c0d-4161-89e4-fb0206335a4e.png)
+ *Figure 10: Accuracy of the Three Algorithms on Separating Hardest Pair (4,9)*
+ 
+Beginning with the easiest pair (0,1), all three algorithms did execptionally well with almost 100% accuracy for LDA and SVM and around 98% for DTC. This shows that all three algorithms can classify images that should be easy to easy to diffrentiate between very well. 
+
+However, when distingushing between the hardest pair (4,9), it is evident that DTC did the best with 96% accuracy. SVM did slightly worse with around 95% whereas LDA was comparatively significantly worse with only 84% accuracy. This shows how the intricacy of the SVM and DTC algorithms are more beneficial at separating between closely knit clusters in our PCA feature space. Additionally, we can definitely expect that if we had increased the number of PCA components, LDA would have attained a much higher accuracy as well.
 
 ### Sec. V. Summary and Conclusions
