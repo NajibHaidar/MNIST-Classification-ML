@@ -526,3 +526,11 @@ We then projected our data onto different sets of 3 V-modes and plotted in 3D:
 While we could not find three modes that would allow a clearer view of data clustering, we can still analyze these several cases altogether. We can see that typically 7 and 9 remain close to each other and in fact according to LDA, they were the 4th most difficult to separate with an accuracy of 91%. At least however they are more easily seperable than 4 and 9 which in all cases appear to be completley mixed into each other. This shows why it was so difficult to separate them using LDA since this problem was too difficult to solve using a linear analysis. Whereas using SVM for example, these points were moved to higher dimensions and cut by hyperplanes, thus provding a better classification accuracy.
 
 ### Sec. V. Summary and Conclusions
+
+In this project, we performed a detailed analysis of the MNIST dataset, which is a collection of handwritten digit images widely used in machine learning research. We started by performing an SVD analysis of the digit images and determined the number of modes required for good image reconstruction. We also interpreted the U, Σ, and V matrices in this context.
+
+Next, we built a linear classifier (LDA) to identify individual digits in the training set. We determined which two digits in the data set were the most difficult and easiest to separate and quantified the accuracy of separation using LDA on the test data.
+
+Finally, we compared the performance of LDA, SVM, and decision trees on the hardest and easiest pair of digits to separate. We found that LDA performed well on the easiest pair, but SVM and decision trees outperformed LDA on the hardest pair.
+
+In conclusion, we successfully analyzed the MNIST dataset and demonstrated the effectiveness of SVD analysis and linear classifiers for identifying handwritten digits. We also compared the performance of different classification algorithms and found that SVM and decision trees can outperform LDA in some cases. Our analysis provides valuable insights into the strengths and weaknesses of different machine learning techniques for image classification tasks.
